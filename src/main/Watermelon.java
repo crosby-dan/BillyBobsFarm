@@ -2,9 +2,16 @@ package main;
 
 public class Watermelon extends Plant {
 
+	//constructor 
+	Watermelon(int quantity) {
+		//This constructor will verify available funds and space before completing the purchase.
+		
+	}
+	
 	@Override
 	public void checkPlantProgress()
 	{
+		super.checkPlantProgress();
 		//Update current marketPrice of watermelon
 		// Check to see if the watermelon patch was hit by a tornado
 		//If yes, reduce the plantQuantity for any plants killed as appropriate
@@ -16,6 +23,7 @@ public class Watermelon extends Plant {
 	@Override
 	public void buyPlant()
 	{
+		super.buyPlant();
 		//Call the super (buyPlant) function (which will err if the square footage will be exceeded)
 		//Increase plant purchased quantity
 		//The calling function must subtract availableCash by the returned cost (which will be zero if the purchase failed)

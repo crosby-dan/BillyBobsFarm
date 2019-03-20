@@ -215,8 +215,8 @@ public class Main {
 	}
 
 	private void setPrices() {
-		seedCost=new double[plants.length][maxRounds];
-		marketPrice=new double[plants.length][maxRounds];
+		//seedCost=new double[plants.length][maxRounds];
+		//marketPrice=new double[plants.length][maxRounds];
 	
 	}
 	

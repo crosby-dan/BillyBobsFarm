@@ -20,7 +20,7 @@ public class Plant {
 
 	public void buyPlant()
 	{
-		// This method will check to make sure there is enough square footage available for this plant.
+		// This method will check to make sure there is enough square feet available for this plant.
 		// Out of money
 		// If not, output failure to console.
 	}

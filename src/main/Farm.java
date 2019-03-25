@@ -12,8 +12,8 @@ public class Farm {
 	double playerCash;
 	String playerName;
 	int currentRound;
-	//ArrayList of type Plant
 
+	//ArrayList of type Plant
 	
 	//Constructor	
 	Farm (String playerName,int farmSize)

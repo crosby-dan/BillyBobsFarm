@@ -5,8 +5,7 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-
-
+//import java.util.Random; 
 
 public class Main {
 
@@ -19,7 +18,11 @@ public class Main {
 	final static double[] squareFootage = {.2,1,.5,.5,5};
 	final static int[] maturityRounds = {1,2,2,3,5};
 	final static double[] baseSeedCost = {.02,.15,.20,.10,.25};
-	final static double[] baseMarketPrice = {.45,1.5,1,.75,7.5};
+	final static double[] baseMarketPrice = {.20,1.5,1,.75,7.5};
+	//Array element 1=plant, 2=round
+	static double[][] seedCost;
+	//Array element 1=plant, 2=round
+	static double[][] marketPrice;
 	
 	public static void main(String[] args) {
 		System.out.println("\r\n" + 
@@ -63,7 +66,8 @@ public class Main {
 			//This block of code will capture the player name.
 			pattern = Pattern.compile("(\\w{3,10})");
 			do {
-				System.out.format("\nPlease enter your first name (3 to 10 digits): ");
+				System.out.format("\nPlayer %d, please enter your first name (3 to 10 digits): ",i+1);
+				@SuppressWarnings("resource")
 				Scanner in = new Scanner (System.in);
 				String input=in.nextLine();
 				matcher = pattern.matcher(input);
@@ -76,9 +80,8 @@ public class Main {
 			list.add(new Farm(matcher.group(1),50));
 		}
 
-		System.out.format("Example of using the seedCost array for Watermelon: %s\n", getPlantIndex("Watermelon"));
-		System.out.format("Example of using the seedCost array for Carrot: %s\n", getPlantIndex("Carrot"));
-		System.out.format("Example of using the seedCost array for Car: %s\n", getPlantIndex("Car"));
+		//System.out.format("Example of using the seedCost array for Watermelon: %s\n", getPlantIndex("Watermelon"));
+		//System.out.format("Example of using the seedCost array for Carrot: %s\n", getPlantIndex("Carrot"));
 		MainMenu();
 	}
 	
@@ -96,12 +99,15 @@ public class Main {
 		
 	public static void MainMenu() {
 		//This block of code will capture the commands S=Start Game, H=High Scores, Q=Quit
+		setPrices();
+		
 		Pattern pattern = Pattern.compile("(?i).*?(s|h|q).*?");
 		Matcher matcher;
 		boolean matchResult;
 		
 		do {
 			System.out.format("\nEnter S to start new game, H for high scores, or Q for quit.\n");
+			@SuppressWarnings("resource")
 			Scanner in = new Scanner (System.in);
 			String input=in.nextLine();
 			matcher = pattern.matcher(input);
@@ -161,19 +167,21 @@ public class Main {
 		
 		//Display welcome message to each player
 		for (int i=0; i<list.size(); i++) {
+			System.out.format("**----------------------------**\n");
 			System.out.format("Round %d Player %s\n", round,list.get(i).playerName);
-		}
-		
-		//Stub:  Add code to display current plant prices
-		//
-		
+
+		//Display cost and forecasted market prices
+		showPrices(round);
+			
 		//This block of code will capture the commands S=Start Game, H=High Scores, Q=Quit
 		Pattern pattern = Pattern.compile("(?i)(buy|quit|no changes)?\\s?(\\d{1,3})?\\s?(tomato|carrot|water|corn|potato)?.*");
 		Matcher matcher;
 		boolean matchResult;
 		
+		//until a user enters Quit or No Changes commands, capture user commands such as "buy 3 carrots".
 		do {
-			System.out.format("\nEnter commands, i.e. 'Buy 3 carrots', or 'no changes'.\n");
+			System.out.format("Enter commands, i.e. 'Buy 3 carrots', or 'no changes'.\n");
+			@SuppressWarnings("resource")
 			Scanner in = new Scanner (System.in);
 			String input=in.nextLine();
 			matcher = pattern.matcher(input);
@@ -187,16 +195,22 @@ public class Main {
 				System.out.format("Received command: %s",matcher.group(1));
 				switch (matcher.group(1).toUpperCase()) {
 				case "BUY": 
-					System.out.format("Attempting to buy quantity: %s of %s",matcher.group(2),matcher.group(3));
+					System.out.format("Attempting to buy quantity: %s of %s\n",matcher.group(2),matcher.group(3));
 
-					
 					//Validate the number of vegetable purchased as being between 1 and 999
 					//Validate the name of the vegetable purchased (i.e. make sure it is present)
-					//Calculate the total cost and verify funds are available
-					//Calculate total space required and verify it is available
-					//Get user confirmation for purchase
-					//Call buyPlants method using polymorphism
-					//Display updated inventory & cash
+					int plant=getPlantIndex(matcher.group(3));
+					int qty=Integer.parseInt(matcher.group(2));
+					if (plant>=0 && plant<=plants.length && qty>=1 && qty<=999) 
+					{
+						//valid add plant command received
+						
+						//Calculate the total cost and verify funds are available
+						//Calculate total space required and verify it is available
+						//Get user confirmation for purchase
+						//Call buyPlants method using polymorphism
+						//Display updated inventory & cash
+					}
 					break;
 				case "NO CHANGES":
 					System.out.println("\n*** No additional changes, round will now be processed. ***");
@@ -210,14 +224,70 @@ public class Main {
 			}
 		}
 		while (!matchResult || (matcher.group(1).toUpperCase()!="QUIT" && matcher.group(1).toUpperCase()!="NO CHANGES"));
+		}
 	
 		return true;
 	}
 
-	private void setPrices() {
-		//seedCost=new double[plants.length][maxRounds];
-		//marketPrice=new double[plants.length][maxRounds];
+	private static void showPrices(int round) {
+		System.out.println("Plant      Seed Cost      Forecasted Market Price");
+		String costDescription, priceDescription;
+		for (int plant=0; plant<plants.length; plant++) {
+
+			//Calculations for seed cost display message
+			double difference=seedCost[plant][round]/baseSeedCost[plant];
+			if (seedCost[plant][round]==baseSeedCost[plant]) {
+				costDescription = String.format("$%5.2f",baseSeedCost[plant]);
+			}
+			else if (difference<1){
+				costDescription = String.format("$%5.2f ***On Sale***  (%3.0f%% discount) %.2f",seedCost[plant][round],(difference-1)*-100,baseSeedCost[plant]);
+			}
+			else {
+				costDescription = String.format("$%5.2f ---Shortage--  (%3.0f%% premium ) %.2f",seedCost[plant][round],(difference-1)*100,baseSeedCost[plant]);
+			}
+
+			//Calculations for market price display message
+			if (round+1<maxRounds) {
+				difference=marketPrice[plant][round+1]/baseMarketPrice[plant];
+				if (marketPrice[plant][round+1]==baseMarketPrice[plant]) {
+					priceDescription = String.format("   Normal Prices Expected   ");
+				}
+				else if (difference<1){
+					priceDescription = String.format("---Weaker Prices Expected---  (%3.0f%% discount) %.2f",(difference-1)*-100,baseMarketPrice[plant]);
+				}
+				else {
+					priceDescription = String.format("++Stronger Prices Expected++  (%3.0f%% premium ) %.2f",(difference-1)*100,baseMarketPrice[plant]);
+				}
+			}
+			else priceDescription="";
+
+			System.out.format("%14s  %15s  %15s\n" ,plants[plant],costDescription,priceDescription);
+			//next line is full output for debug use only
+			//System.out.format("Plant: %s, Base seed cost: %5.3f Round %d cost: %5.3f, Base market price: %5.3f Market Price: %5.3f\n" ,plants[plant],baseSeedCost[plant],round+1,seedCost[plant][round],baseMarketPrice[plant],marketPrice[plant][round]);
+		}
+	}
 	
+	private static void setPrices() {
+		//Array element 1=plant, 2=round
+		seedCost=new double[plants.length][maxRounds];
+		//marketPrice=new double[plants.length][maxRounds];
+		marketPrice=new double[plants.length][maxRounds];
+		for (int plant=0; plant<plants.length; plant++) {
+			for (int round=0; round<maxRounds; round++) {
+				seedCost[plant][round]=roundDigits(baseSeedCost[plant]+baseSeedCost[plant]*((Math.random()-.5)),2);
+				marketPrice[plant][round]=baseMarketPrice[plant]+baseMarketPrice[plant]*((Math.random()-.5));
+				//this next line is for debugging only
+				//System.out.format("Plant: %d, Base seed cost: %5.2f Round %d cost: %5.2f, Base market price: %5.2f Market Price: %5.2f\n" , plant,baseSeedCost[plant],round+1,seedCost[plant][round],baseMarketPrice[plant],marketPrice[plant][round]);
+			}
+		}		
+	}
+
+	public static double roundDigits (double number,int digits) {
+		//System.out.format("Start # %5.3f Multiplier %.0f",number,Math.pow(10, digits));
+		number=(float)(int)(number*Math.pow(10, digits));
+		number=number/Math.pow(10, digits);
+		//System.out.format("DEBUG %5.3f\n",number);
+		return number;
 	}
 	
 }

@@ -13,6 +13,7 @@ public class Main {
 	private static int playerCount;
 	
 	//Initialize variable constants
+	final static boolean verbose=false;
 	final static int maxRounds=10;
 	final static String[] plants = { "Carrot", "Tomato", "Potato", "Corn", "Watermelon"};
 	final static double[] squareFootage = {.2,1,.5,.5,5};
@@ -163,6 +164,12 @@ public class Main {
 	
 	}
 	
+	/**
+	 * Loops through each player and gathers input for commands that can be processed by each player
+	 * in each round.
+	 * @param int round The number of the round being processed
+	 * @return      void
+	 */
 	public static boolean ProcessGameRound(int round) {
 		
 		//Display welcome message to each player
@@ -229,37 +236,58 @@ public class Main {
 		return true;
 	}
 
+	/**
+	 * For the selected round, show the current seed costs.
+	 * For the upcoming round, show forecasted market prices.
+	 * @param int round Display seed costs & forecasted prices for this game round.
+	 * @return      void
+	 */
 	private static void showPrices(int round) {
 		System.out.println("Plant      Seed Cost      Forecasted Market Price");
-		String costDescription, priceDescription;
+		String costDescription, priceDescription="";
 		for (int plant=0; plant<plants.length; plant++) {
 
 			//Calculations for seed cost display message
 			double difference=seedCost[plant][round]/baseSeedCost[plant];
 			if (seedCost[plant][round]==baseSeedCost[plant]) {
-				costDescription = String.format("$%5.2f",baseSeedCost[plant]);
+				costDescription = String.format("$%5.2f              ",baseSeedCost[plant]);
 			}
 			else if (difference<1){
-				costDescription = String.format("$%5.2f ***On Sale***  (%3.0f%% discount) %.2f",seedCost[plant][round],(difference-1)*-100,baseSeedCost[plant]);
+				if (verbose) 
+					costDescription = String.format("$%5.2f ***On Sale***  (%3.0f%% discount) %.2f",seedCost[plant][round],(difference-1)*-100,baseSeedCost[plant]);
+				else
+					costDescription = String.format("$%5.2f ***On Sale***  (%3.0f%% discount)",seedCost[plant][round],(difference-1)*-100);
 			}
 			else {
-				costDescription = String.format("$%5.2f ---Shortage--  (%3.0f%% premium ) %.2f",seedCost[plant][round],(difference-1)*100,baseSeedCost[plant]);
+				if (verbose) 
+					costDescription = String.format("$%5.2f ---Shortage--  (%3.0f%% premium ) %.2f",seedCost[plant][round],(difference-1)*100,baseSeedCost[plant]);
+				else
+					costDescription = String.format("$%5.2f ---Shortage--  (%3.0f%% premium )",seedCost[plant][round],(difference-1)*100);
 			}
 
 			//Calculations for market price display message
-			if (round+1<maxRounds) {
-				difference=marketPrice[plant][round+1]/baseMarketPrice[plant];
-				if (marketPrice[plant][round+1]==baseMarketPrice[plant]) {
-					priceDescription = String.format("   Normal Prices Expected   ");
-				}
-				else if (difference<1){
-					priceDescription = String.format("---Weaker Prices Expected---  (%3.0f%% discount) %.2f",(difference-1)*-100,baseMarketPrice[plant]);
-				}
-				else {
-					priceDescription = String.format("++Stronger Prices Expected++  (%3.0f%% premium ) %.2f",(difference-1)*100,baseMarketPrice[plant]);
+			//A current weakness of this code is it only forecasts 1 round ahead
+			//which doesn't help someone with plant maturities of >1 round.
+			for (int x=round+1;x<maxRounds;x++) {
+				if (round+1<maxRounds) {
+					difference=marketPrice[plant][x]/baseMarketPrice[plant];
+					if (marketPrice[plant][x]==baseMarketPrice[plant]) {
+						priceDescription = "..";
+					}
+					else if (difference<1){
+						if (verbose)
+							priceDescription = priceDescription + String.format("---(%3.0f%% discount) %.2f",(difference-1)*-100,baseMarketPrice[plant]);
+						else
+							priceDescription = priceDescription + "--";
+					}
+					else {
+						if (verbose)
+							priceDescription = priceDescription + String.format("+++(%3.0f%% premium ) %.2f",(difference-1)*100,baseMarketPrice[plant]);
+						else
+							priceDescription = "--";
+					}
 				}
 			}
-			else priceDescription="";
 
 			System.out.format("%14s  %15s  %15s\n" ,plants[plant],costDescription,priceDescription);
 			//next line is full output for debug use only
@@ -267,6 +295,11 @@ public class Main {
 		}
 	}
 	
+
+	/**
+	 * Loops through all plants and rounds and calculates seed costs and market prices.
+	 * @return      void
+	 */
 	private static void setPrices() {
 		//Array element 1=plant, 2=round
 		seedCost=new double[plants.length][maxRounds];
@@ -277,16 +310,21 @@ public class Main {
 				seedCost[plant][round]=roundDigits(baseSeedCost[plant]+baseSeedCost[plant]*((Math.random()-.5)),2);
 				marketPrice[plant][round]=baseMarketPrice[plant]+baseMarketPrice[plant]*((Math.random()-.5));
 				//this next line is for debugging only
-				//System.out.format("Plant: %d, Base seed cost: %5.2f Round %d cost: %5.2f, Base market price: %5.2f Market Price: %5.2f\n" , plant,baseSeedCost[plant],round+1,seedCost[plant][round],baseMarketPrice[plant],marketPrice[plant][round]);
+				System.out.format("Plant: %d, Base seed cost: %5.2f Round %d cost: %5.2f, Base market price: %5.2f Market Price: %5.2f\n" , plant,baseSeedCost[plant],round+1,seedCost[plant][round],baseMarketPrice[plant],marketPrice[plant][round]);
 			}
 		}		
 	}
 
+	
+	/**
+	 * Round a number to the provided precision
+	 * @param - double for the number to be rounded
+	 * @param - integer for the number of digits of precision
+	 * @return double
+	 */
 	public static double roundDigits (double number,int digits) {
-		//System.out.format("Start # %5.3f Multiplier %.0f",number,Math.pow(10, digits));
-		number=(float)(int)(number*Math.pow(10, digits));
+		number=(float)(int)(number*Math.pow(10, digits)+.5);
 		number=number/Math.pow(10, digits);
-		//System.out.format("DEBUG %5.3f\n",number);
 		return number;
 	}
 	

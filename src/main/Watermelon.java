@@ -5,7 +5,6 @@ public class Watermelon extends Plant {
 	//constructor 
 	Watermelon(int quantity) {
 		//This constructor will verify available funds and space before completing the purchase.
-		
 	}
 	
 	@Override

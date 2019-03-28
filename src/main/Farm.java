@@ -4,18 +4,21 @@
 package main;
 
 import java.util.ArrayList;
+//TODO Add method javadoc prefixes like in Main
 
 /**
- * @author Dan Crosby
- * Each player will have their own farm.
- * Farms can have plants
- * Farms have their own bank account total (playerCash)
+ * @author Dan Crosby & Leanne Thornton
+ * Each player will have their own farm.  (The correct farm can be selected using the Main.currentFarm variable)
+ * The main class will have an ArrayList of type ArrayList<Farm>
+ * To access the appropriate Farm use farmList.get(Main.currentFarm)
+ * Farms can contain plants via ArrayList plantList
+ * Farms have their own fields for playerCash, playerName, farmSize, and spaceUsed.
  */
 public class Farm {
-	String playerName;
-	int farmSize;
-	float spaceUsed=0;
-	double playerCash;
+	private String playerName;
+	private int farmSize;
+	private float spaceUsed=0;
+	private double playerCash;
 
 	//ArrayList of type Plant
 	protected ArrayList<Plant> plantList = new ArrayList<>();
@@ -28,6 +31,34 @@ public class Farm {
 		this.playerName=playerName;
 	}
 
+	public String getPlayerName() {
+		return this.playerName;
+	}
+	
+	public double getPlayerCash() {
+		return this.playerCash;
+	}
+	
+	public double getSpaceAvailable() {
+		return this.farmSize-spaceUsed;
+	}
+	
+	public double getFarmSize() {
+		return this.farmSize;
+	}
+	
+	protected void changeCash(double amount) {
+		// TODO Throw exception if cash will be less than zero
+		
+		this.playerCash+=amount;
+	}
+	
+	protected void changeSpace(double space) {
+		// TODO Throw exception if space will be more than maximum or less than zero
+		
+		this.spaceUsed+=space;
+	}
+	
 	public void processRound ()
 	{
 		//Loop through each plant in the plants arrayList
@@ -38,8 +69,9 @@ public class Farm {
 		Main.promptEnterKey();
 	}
 
-	protected void saveResults ()
+	public void saveResults ()
 	{
+		//TODO Create a process to save the results to a file.
 		//Determine the name of the file to save
 		//Save player name, date, number of rounds, and cash raised
 		//Save an inventory of the garden
@@ -54,10 +86,10 @@ public class Farm {
 		return qty;
 	}
 
-	public void addPlant(int plant, int qty) {
+	protected void addPlant(int plant, int qty) {
 		switch (plant) {
 		case 0: 
-			//Leanne - replace these "not implemented" lines with calls to add the appropriate vegetable (like it is on case 4:).
+			// TODO Leanne - replace these "not implemented" lines with calls to add the appropriate vegetable (like it is on case 4:).
 			System.out.format("Plant %s not implemented.",Main.plants[plant]);
 			break;
 		case 1: 

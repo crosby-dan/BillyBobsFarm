@@ -1,33 +1,45 @@
 package main;
+//TODO Add method javadoc prefixes like in Main
 
+/**
+ * @author Dan Crosby & Leanne Thornton
+ * Class for Plant objects, which are extended by the different plant types.
+ * This class should not be instantiated directly, only through the appropriate child class.
+ * An ArrayList of type ArrayList<Plant> is contained in the Farm class.
+ */
 public abstract class Plant {
 	protected int plantQuantity;
-	protected double plantSize;
-	protected double plantCost;
+	protected double spaceUsed;
+	protected double purchaseCost;
 	protected int maturityRound;
 	protected int maxHarvestRound;
+	protected int purchaseRound;
+	
+	// TODO Leanne Implement Carrot class based on Watermelon
+	// TODO Leanne Implement Corn class based on Watermelon
+	// TODO Leanne Implement Tomato class based on Watermelon
+	// TODO Leanne Implement Potato class based on Watermelon
 
 	//Constructor for the plant class
 	//Which will tally the costs & space required and throw an error if necessary.
 	Plant (int plant,int quantity) {
 		this.plantQuantity=quantity;
-		plantCost=Main.seedCost[plant][Main.currentRound]*quantity;
-		plantSize=Main.squareFootage[plant]*quantity;
+		purchaseCost=Main.seedCost[plant][Main.currentRound]*quantity;
+		spaceUsed=Main.squareFootage[plant]*quantity;
 		//System.out.format("Current farm is %d of %d\n", Main.currentFarm, Main.farmList.size());
 		//System.out.format("Player cash is %5.2f\n", Main.farmList.get(Main.currentFarm).playerCash);
-		if (plantCost>Main.farmList.get(Main.currentFarm).playerCash) {
-			System.out.format("Insufficient cash, purchase failed.\n",Main.farmList.get(Main.currentFarm).playerCash);
+		if (purchaseCost>Main.farmList.get(Main.currentFarm).getPlayerCash()) {
+			System.out.format("Insufficient cash, purchase failed.\n",Main.farmList.get(Main.currentFarm).getPlayerCash());
 			throw new RuntimeException();
 		}
-		if (plantSize+Main.farmList.get(Main.currentFarm).spaceUsed>Main.farmList.get(Main.currentFarm).farmSize) {
-			System.out.format("Insufficient land space available, purchase failed.\n",Main.farmList.get(Main.currentFarm).spaceUsed);
+		if (spaceUsed>Main.farmList.get(Main.currentFarm).getSpaceAvailable()) {
+			System.out.format("Insufficient land space available, purchase failed.\n",Main.farmList.get(Main.currentFarm).getSpaceAvailable());
 			throw new RuntimeException();
 		}
 
 		//All checks passed, go ahead and complete purchase.
-		//System.out.format("Updating cash and space used for farm %d\n", Main.currentFarm);
-		Main.farmList.get(Main.currentFarm).playerCash-=plantCost;
-		Main.farmList.get(Main.currentFarm).spaceUsed+=plantSize;
+		Main.farmList.get(Main.currentFarm).changeCash(purchaseCost*-1);
+		Main.farmList.get(Main.currentFarm).changeSpace(spaceUsed);
 		//System.out.format("Purchased %d of %s seed(s) for %5.2f.  Player cash is %5.2f, available space is %5.1f.\n",quantity,getType(),plantCost,Main.farmList.get(Main.currentFarm).playerCash,Main.totalSquareFeet-Main.farmList.get(Main.currentFarm).spaceUsed);
 	}
 	
@@ -52,14 +64,15 @@ public abstract class Plant {
 				System.out.format("Billy Bob's tractor broke and reduced your revenues by %d%%.", productionImpact);
 			}
 			
-			//Leanne - Check to see if there is a late frost (or maybe we implement this as "great weather" that can boost productivity.
+			// TODO Leanne - Check to see if there is a late frost (or maybe we implement this as "great weather" that can boost productivity.
 
 			//Calculate money earned
 			float cashEarned = (float) (plantQuantity * Main.marketPrice[getIndex()][Main.currentRound] * ((100-productionImpact)/100));
-			Main.farmList.get(Main.currentFarm).playerCash+=cashEarned;
+			Main.farmList.get(Main.currentFarm).changeCash(cashEarned);
 			//If plant is available for a single harvest only, then reduce the square footage and plantQuantity
-			
 
+			// TODO Leanne - Add code to display treasure chest (See try catch block above for tractor.txt)
+			System.out.format("Congratulations, you have earned %5.2f from your round %d %s plant(s).\n", cashEarned, purchaseRound, getType());
 		}
 	}
 	abstract int getIndex();

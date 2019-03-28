@@ -12,7 +12,7 @@ import java.util.regex.Matcher;
 
 public class Main {
 
-	static ArrayList<Farm> farmList = new ArrayList<>();
+	protected static ArrayList<Farm> farmList = new ArrayList<>();
 	private static int playerCount;
 	
 	//Initialize global properties
@@ -118,6 +118,7 @@ public class Main {
 				i++;
 		}
 		System.out.format("Error: Failed to locate plant named '%s'.  Valid values include: %s\n",plantName,Arrays.toString(plants));
+		// TODO Leanne - replace this with one of the new custom Exception classes.
 		throw new NoSuchElementException();
 	}
 		
@@ -125,7 +126,7 @@ public class Main {
 	 * Main menu with options for high scores, quit, and play game.
 	 * @return      void
 	 */
-	public static void MainMenu() {
+	private static void MainMenu() {
 		//This block of code will capture the commands S=Start Game, H=High Scores, Q=Quit
 		setPrices();
 		
@@ -146,10 +147,10 @@ public class Main {
 		//assign the filled in or not value to a variable
 		switch (matcher.group(1)) {
 		case "S": 
-			StartGame();  
+			startGame();  
 			break;
 		case "H":
-			HighScores();
+			highScores();
 			break;
 		case "Q":
 			return;
@@ -160,7 +161,7 @@ public class Main {
 	 * Display high scores from file
 	 * @return      void
 	 */
-	public static void HighScores() {
+	public static void highScores() {
 		System.out.println ("\r\n" + 
 				"      __    __  __            __               ______                                                    \r\n" + 
 				"     /  |  /  |/  |          /  |             /      \\                                                   \r\n" + 
@@ -187,21 +188,21 @@ public class Main {
 	 * 	  If the player types Quit (and then ProcessGameRound returns false), then the game should end.
 	 * @return      void
 	 */
-	public static void StartGame() {
+	public static void startGame() {
 		boolean roundSuccess=true;
 		
 		//Display welcome message to each player
 		for (currentRound=1; currentRound<=maxRounds && roundSuccess; currentRound++) {
 			for (currentFarm=0; currentFarm<farmList.size(); currentFarm++) {
-				System.out.format("Welcome player %s on farm %d!\n", farmList.get(currentFarm).playerName, currentFarm);
-				roundSuccess=ProcessGameRound();
+				System.out.format("Welcome player %s on farm %d!\n", farmList.get(currentFarm).getPlayerName(), currentFarm);
+				roundSuccess=processGameRound();
 				//graceful abort if the user entered quit within the round.
 				if (!roundSuccess) return;
 			}
-			System.out.format("Advancing to next round.");
+			//System.out.format("Advancing to next round.");
 			//At the end of the round, loop through each plant and check progress
 			for (currentFarm=0; currentFarm<farmList.size(); currentFarm++) {
-				System.out.format("Updates for player %s on farm %d!\n", farmList.get(currentFarm).playerName, currentFarm);
+				//System.out.format("Updates for player %s on farm %d!\n", farmList.get(currentFarm).playerName, currentFarm);
 			    farmList.get(currentFarm).processRound();
 			}
 		}
@@ -213,7 +214,7 @@ public class Main {
 	 * @param int round The number of the round being processed
 	 * @return      void
 	 */
-	public static boolean ProcessGameRound() {
+	public static boolean processGameRound() {
 		
 		Pattern pattern = Pattern.compile("(?i)(buy|quit|no changes)?\\s?(\\d{1,3})?\\s?(tomato|carrot|watermelon|corn|potato)?.*");
 		Matcher matcher;
@@ -224,7 +225,7 @@ public class Main {
 		showPrices();
 		do {
 			//System.out.format("Purchased %d of %s seed(s) for %5.2f.  Player cash is %5.2f, available space is %5.1f.\n",quantity,getType(),plantCost,Main.farmList.get(Main.currentFarm).playerCash,Main.totalSquareFeet-Main.farmList.get(Main.currentFarm).spaceUsed);
-			System.out.format("Round %d Player %s Cash $%5.2f Space %4.1f:  Enter commands, 'Buy 3 carrots', 'Quit' or 'no changes'>>\n", currentRound,farmList.get(currentFarm).playerName,farmList.get(currentFarm).playerCash,totalSquareFeet-farmList.get(Main.currentFarm).spaceUsed);
+			System.out.format("Round %d Player %s Cash $%5.2f Space %4.1f:  Enter commands, 'Buy 3 carrots', 'Quit' or 'no changes'>>\n", currentRound,farmList.get(currentFarm).getPlayerName(),farmList.get(currentFarm).getPlayerCash(),farmList.get(Main.currentFarm).getSpaceAvailable());
 			@SuppressWarnings("resource")
 			Scanner in = new Scanner (System.in);
 			String input=in.nextLine();
@@ -251,13 +252,15 @@ public class Main {
 					if (plant>=0 && plant<=plants.length && qty>=1 && qty<=999) 
 					{
 						//valid add plant command received
-						farmList.get(currentFarm).addPlant(plant,qty);
-						
-						//Calculate the total cost and verify funds are available
-						//Calculate total space required and verify it is available
-						//Get user confirmation for purchase
-						//Call buyPlants method using polymorphism
-						//Display updated inventory & cash
+
+						//The AddPlant call is in a try block since this may fail if there is
+						//insufficient cash or insufficient land space available.
+						try {
+							farmList.get(currentFarm).addPlant(plant,qty);
+						}
+						catch (Exception ex) {
+							System.out.format("Failed to complete purchase.  Command cancelled.\n");
+						}
 					}
 					break;
 				case "NO CHANGES":
@@ -270,7 +273,7 @@ public class Main {
 			}
 		}
 		while (!matchResult || matcher.group(1)==null || (!matcher.group(1).equalsIgnoreCase("QUIT") && !matcher.group(1).equalsIgnoreCase("NO CHANGES")));
-		System.out.println("\n*** No additional changes, round will now be processed. ***");
+		//System.out.println("\n*** No additional changes, round will now be processed. ***");
 	
 		return true;
 	}
@@ -364,6 +367,9 @@ public class Main {
 		return number;
 	}
 
+	/**
+	 * A simple function to prompt and catch an enter key to manage the flow of user input.
+	 */
 	public static void promptEnterKey(){
 	    System.out.format("Press ENTER to continue.");
 	    try {
@@ -376,6 +382,10 @@ public class Main {
 	    }
 	}
 	
+	/**
+	 * A simple function to prompt and catch an enter key to manage the flow of user input.
+	 * @param String fn - the path and file name of the text file to output to console, i.e. "img/tractor.txt"
+	 */
 	public static void textToConsole(String fn) throws IOException {
 		BufferedReader in = new BufferedReader(new FileReader(fn));
 		String line = in.readLine();

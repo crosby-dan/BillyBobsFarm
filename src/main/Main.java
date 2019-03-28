@@ -1,4 +1,7 @@
 package main;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
@@ -9,22 +12,36 @@ import java.util.regex.Matcher;
 
 public class Main {
 
-	static ArrayList<Farm> list = new ArrayList<>();
+	static ArrayList<Farm> farmList = new ArrayList<>();
 	private static int playerCount;
 	
-	//Initialize variable constants
-	final static boolean verbose=false;
+	//Initialize global properties
 	final static int maxRounds=10;
+	final static int totalSquareFeet=25;
+	final static double startingMoney=2;
+	
+	//Arrays to initialize plant level properties
 	final static String[] plants = { "Carrot", "Tomato", "Potato", "Corn", "Watermelon"};
 	final static double[] squareFootage = {.2,1,.5,.5,5};
 	final static int[] maturityRounds = {1,2,2,3,5};
 	final static double[] baseSeedCost = {.02,.15,.20,.10,.25};
 	final static double[] baseMarketPrice = {.20,1.5,1,.75,7.5};
+
+	//This is the number of rounds in which plants produce crops
+	final static int[] harvestRounds = {1, 5, 1, 3, 2};
+	
 	//Array element 1=plant, 2=round
 	static double[][] seedCost;
 	//Array element 1=plant, 2=round
 	static double[][] marketPrice;
+	static int currentRound;
+	static int currentFarm;
 	
+	/**
+	 * Main program execution thread
+	 * @param String[] args - which are not used in this method.
+	 * @return      void
+	 */
 	public static void main(String[] args) {
 		System.out.println("\r\n" + 
 				"    _______   __  __  __                  _______             __       __               ________                                \r\n" + 
@@ -48,6 +65,7 @@ public class Main {
 		boolean matchResult;
 		do {
 			System.out.format("\nPlease enter the number of players (1 to 4): ");
+			@SuppressWarnings("resource")
 			Scanner in = new Scanner (System.in);
 			String input=in.nextLine();
 			matcher = pattern.matcher(input);
@@ -78,7 +96,7 @@ public class Main {
 			while (!matchResult);
 	
 			//Create a farm for the new player with a farm size of 50 square feet.   
-			list.add(new Farm(matcher.group(1),50));
+			farmList.add(new Farm(matcher.group(1),totalSquareFeet,startingMoney));
 		}
 
 		//System.out.format("Example of using the seedCost array for Watermelon: %s\n", getPlantIndex("Watermelon"));
@@ -86,6 +104,11 @@ public class Main {
 		MainMenu();
 	}
 	
+	/**
+	 * Loops through each of the "plants" array and if the provided plant name matches, return the index.
+	 * @param String plantName
+	 * @return int
+	 */	
 	public static int getPlantIndex(String plantName) {
 		int i=0;
 		for (String element: plants) {
@@ -98,6 +121,10 @@ public class Main {
 		throw new NoSuchElementException();
 	}
 		
+	/**
+	 * Main menu with options for high scores, quit, and play game.
+	 * @return      void
+	 */
 	public static void MainMenu() {
 		//This block of code will capture the commands S=Start Game, H=High Scores, Q=Quit
 		setPrices();
@@ -129,6 +156,10 @@ public class Main {
 		}
 	}
 	
+	/**
+	 * Display high scores from file
+	 * @return      void
+	 */
 	public static void HighScores() {
 		System.out.println ("\r\n" + 
 				"      __    __  __            __               ______                                                    \r\n" + 
@@ -148,20 +179,32 @@ public class Main {
 		//Add code here to open high score files and then print it out to the console.
 	}
 	
+	/**
+	 * Play the game:
+	 * Loop through each round
+	 * 	  Loop through each player within each round
+	 * 	  Player moves to the next round by typing "no changes"
+	 * 	  If the player types Quit (and then ProcessGameRound returns false), then the game should end.
+	 * @return      void
+	 */
 	public static void StartGame() {
 		boolean roundSuccess=true;
 		
 		//Display welcome message to each player
-		for (int i=0; i<list.size(); i++) {
-			System.out.format("Welcome player %s!\n", list.get(i).playerName);
+		for (currentRound=1; currentRound<=maxRounds && roundSuccess; currentRound++) {
+			for (currentFarm=0; currentFarm<farmList.size(); currentFarm++) {
+				System.out.format("Welcome player %s on farm %d!\n", farmList.get(currentFarm).playerName, currentFarm);
+				roundSuccess=ProcessGameRound();
+				//graceful abort if the user entered quit within the round.
+				if (!roundSuccess) return;
+			}
+			System.out.format("Advancing to next round.");
+			//At the end of the round, loop through each plant and check progress
+			for (currentFarm=0; currentFarm<farmList.size(); currentFarm++) {
+				System.out.format("Updates for player %s on farm %d!\n", farmList.get(currentFarm).playerName, currentFarm);
+			    farmList.get(currentFarm).processRound();
+			}
 		}
-
-		//Display welcome message to each player
-		for (int k=1; k<=maxRounds && roundSuccess; k++) {
-			roundSuccess=ProcessGameRound(k);
-		}
-	
-	
 	}
 	
 	/**
@@ -170,47 +213,45 @@ public class Main {
 	 * @param int round The number of the round being processed
 	 * @return      void
 	 */
-	public static boolean ProcessGameRound(int round) {
+	public static boolean ProcessGameRound() {
 		
-		//Display welcome message to each player
-		for (int i=0; i<list.size(); i++) {
-			System.out.format("**----------------------------**\n");
-			System.out.format("Round %d Player %s\n", round,list.get(i).playerName);
-
-		//Display cost and forecasted market prices
-		showPrices(round);
-			
-		//This block of code will capture the commands S=Start Game, H=High Scores, Q=Quit
-		Pattern pattern = Pattern.compile("(?i)(buy|quit|no changes)?\\s?(\\d{1,3})?\\s?(tomato|carrot|water|corn|potato)?.*");
+		Pattern pattern = Pattern.compile("(?i)(buy|quit|no changes)?\\s?(\\d{1,3})?\\s?(tomato|carrot|watermelon|corn|potato)?.*");
 		Matcher matcher;
 		boolean matchResult;
 		
+		//This block of code will capture the commands S=Start Game, H=High Scores, Q=Quit
 		//until a user enters Quit or No Changes commands, capture user commands such as "buy 3 carrots".
+		showPrices();
 		do {
-			System.out.format("Enter commands, i.e. 'Buy 3 carrots', or 'no changes'.\n");
+			//System.out.format("Purchased %d of %s seed(s) for %5.2f.  Player cash is %5.2f, available space is %5.1f.\n",quantity,getType(),plantCost,Main.farmList.get(Main.currentFarm).playerCash,Main.totalSquareFeet-Main.farmList.get(Main.currentFarm).spaceUsed);
+			System.out.format("Round %d Player %s Cash $%5.2f Space %4.1f:  Enter commands, 'Buy 3 carrots', 'Quit' or 'no changes'>>\n", currentRound,farmList.get(currentFarm).playerName,farmList.get(currentFarm).playerCash,totalSquareFeet-farmList.get(Main.currentFarm).spaceUsed);
 			@SuppressWarnings("resource")
 			Scanner in = new Scanner (System.in);
 			String input=in.nextLine();
 			matcher = pattern.matcher(input);
 			matchResult=matcher.find();
-			if (!matchResult) 
+			if (!matchResult || matcher.group(1)==null) 
 				{
 					System.out.println("\\nEnter commands, i.e. 'Buy 3 carrots', or 'no changes.\n"); 
 				}
 			else 
 			{
-				System.out.format("Received command: %s",matcher.group(1));
+				//System.out.format("Received command: %s",matcher.group(1));
 				switch (matcher.group(1).toUpperCase()) {
 				case "BUY": 
-					System.out.format("Attempting to buy quantity: %s of %s\n",matcher.group(2),matcher.group(3));
+					//System.out.format("Attempting to buy quantity: %s of %s\n",matcher.group(2),matcher.group(3));
 
 					//Validate the number of vegetable purchased as being between 1 and 999
 					//Validate the name of the vegetable purchased (i.e. make sure it is present)
 					int plant=getPlantIndex(matcher.group(3));
 					int qty=Integer.parseInt(matcher.group(2));
+
+					//System.out.format("Attempting to buy quantity: %d of plant %d\n",qty,plant);
+					
 					if (plant>=0 && plant<=plants.length && qty>=1 && qty<=999) 
 					{
 						//valid add plant command received
+						farmList.get(currentFarm).addPlant(plant,qty);
 						
 						//Calculate the total cost and verify funds are available
 						//Calculate total space required and verify it is available
@@ -220,18 +261,16 @@ public class Main {
 					}
 					break;
 				case "NO CHANGES":
-					System.out.println("\n*** No additional changes, round will now be processed. ***");
 					// allow the loop to capture more command input to exit
 					break;
 				case "QUIT":
 					System.out.println("\n*** Quit command received; Billy Bob is going home disappointed. ***");
 					return false;
 				}		
-				
 			}
 		}
-		while (!matchResult || (matcher.group(1).toUpperCase()!="QUIT" && matcher.group(1).toUpperCase()!="NO CHANGES"));
-		}
+		while (!matchResult || matcher.group(1)==null || (!matcher.group(1).equalsIgnoreCase("QUIT") && !matcher.group(1).equalsIgnoreCase("NO CHANGES")));
+		System.out.println("\n*** No additional changes, round will now be processed. ***");
 	
 		return true;
 	}
@@ -242,57 +281,54 @@ public class Main {
 	 * @param int round Display seed costs & forecasted prices for this game round.
 	 * @return      void
 	 */
-	private static void showPrices(int round) {
-		System.out.println("Plant      Seed Cost      Forecasted Market Price");
+	private static void showPrices() {
+		//clear some blank lines so that the rounds don't blend together in the output
+		System.out.println("\n\n\n\n\n\n\n\n");
+		//show the seed & vegetable market information
+		System.out.format("**-----------------------------------------------------------------------------------------**\n");
+		System.out.format("**------------------------------Stormin' Norman's Farmers Market---------------------------**\n");
+		System.out.format("**-----------------------------------------------------------------------------------------**\n");
+		System.out.println("** Plant       Seed    Current          Space      Rounds     Harvest  Harvest             **");
+		System.out.println("**             Cost    Promotion        Required   to mature  Price    Forecast            **");
 		String costDescription, priceDescription="";
 		for (int plant=0; plant<plants.length; plant++) {
 
 			//Calculations for seed cost display message
-			double difference=seedCost[plant][round]/baseSeedCost[plant];
-			if (seedCost[plant][round]==baseSeedCost[plant]) {
-				costDescription = String.format("$%5.2f              ",baseSeedCost[plant]);
+			double difference=seedCost[plant][currentRound]/baseSeedCost[plant];
+			if (seedCost[plant][currentRound]==baseSeedCost[plant]) {
+				costDescription = String.format("$%-5.2f",baseSeedCost[plant]);
 			}
 			else if (difference<1){
-				if (verbose) 
-					costDescription = String.format("$%5.2f ***On Sale***  (%3.0f%% discount) %.2f",seedCost[plant][round],(difference-1)*-100,baseSeedCost[plant]);
-				else
-					costDescription = String.format("$%5.2f ***On Sale***  (%3.0f%% discount)",seedCost[plant][round],(difference-1)*-100);
+				costDescription = String.format("$%-5.2f  Save %-3.0f%%",seedCost[plant][currentRound],(difference-1)*-100);
 			}
 			else {
-				if (verbose) 
-					costDescription = String.format("$%5.2f ---Shortage--  (%3.0f%% premium ) %.2f",seedCost[plant][round],(difference-1)*100,baseSeedCost[plant]);
-				else
-					costDescription = String.format("$%5.2f ---Shortage--  (%3.0f%% premium )",seedCost[plant][round],(difference-1)*100);
+				costDescription = String.format("$%-5.2f  Surcharge %-3.0f%%",seedCost[plant][currentRound],(difference-1)*100);
 			}
 
 			//Calculations for market price display message
 			//A current weakness of this code is it only forecasts 1 round ahead
 			//which doesn't help someone with plant maturities of >1 round.
-			for (int x=round+1;x<maxRounds;x++) {
-				if (round+1<maxRounds) {
-					difference=marketPrice[plant][x]/baseMarketPrice[plant];
-					if (marketPrice[plant][x]==baseMarketPrice[plant]) {
-						priceDescription = "..";
-					}
-					else if (difference<1){
-						if (verbose)
-							priceDescription = priceDescription + String.format("---(%3.0f%% discount) %.2f",(difference-1)*-100,baseMarketPrice[plant]);
-						else
-							priceDescription = priceDescription + "--";
-					}
-					else {
-						if (verbose)
-							priceDescription = priceDescription + String.format("+++(%3.0f%% premium ) %.2f",(difference-1)*100,baseMarketPrice[plant]);
-						else
-							priceDescription = "--";
-					}
+			priceDescription="";
+			for (int x=currentRound+1;x<maxRounds;x++) {
+				difference=marketPrice[plant][x]/baseMarketPrice[plant];
+				if (marketPrice[plant][x]==baseMarketPrice[plant]) {
+					priceDescription = priceDescription + ".";
+				}
+				else if (difference<1){
+					priceDescription = priceDescription + "-";
+				}
+				else {
+					priceDescription = priceDescription + "+";
 				}
 			}
-
-			System.out.format("%14s  %15s  %15s\n" ,plants[plant],costDescription,priceDescription);
-			//next line is full output for debug use only
-			//System.out.format("Plant: %s, Base seed cost: %5.3f Round %d cost: %5.3f, Base market price: %5.3f Market Price: %5.3f\n" ,plants[plant],baseSeedCost[plant],round+1,seedCost[plant][round],baseMarketPrice[plant],marketPrice[plant][round]);
+			//This shows the current cost & price list for each plant
+			System.out.format("** %-10s  %-23s  %-8.2f   %-9d  $%-7.2f %-20s**\n" ,plants[plant],costDescription,squareFootage[plant],maturityRounds[plant],baseMarketPrice[plant],priceDescription);
 		}
+		System.out.format("**-----------------------------------------------------------------------------------------**\n");
+		//System.out.format("** Round %d of %d   Player %-12s    Funds: $%5.2f     Available Space:  %3.1f         **\n", currentRound,maxRounds,farmList.get(currentFarm).playerName,farmList.get(currentFarm).playerCash,(float)totalSquareFeet-farmList.get(currentFarm).spaceUsed);
+		System.out.format("** Carrots %3d   Tomatoes %3d   Potatoes %3d   Corn %3d   Watermelons %3d                  **\n",farmList.get(currentFarm).getCount("Carrot"),farmList.get(currentFarm).getCount("Tomato"),farmList.get(currentFarm).getCount("Potato"),farmList.get(currentFarm).getCount("Corn"),farmList.get(currentFarm).getCount("Watermelon"));
+		System.out.format("**-----------------------------------------------------------------------------------------**\n");
+
 	}
 	
 
@@ -310,7 +346,7 @@ public class Main {
 				seedCost[plant][round]=roundDigits(baseSeedCost[plant]+baseSeedCost[plant]*((Math.random()-.5)),2);
 				marketPrice[plant][round]=baseMarketPrice[plant]+baseMarketPrice[plant]*((Math.random()-.5));
 				//this next line is for debugging only
-				System.out.format("Plant: %d, Base seed cost: %5.2f Round %d cost: %5.2f, Base market price: %5.2f Market Price: %5.2f\n" , plant,baseSeedCost[plant],round+1,seedCost[plant][round],baseMarketPrice[plant],marketPrice[plant][round]);
+				//System.out.format("Plant: %d, Base seed cost: %5.2f Round %d cost: %5.2f, Base market price: %5.2f Market Price: %5.2f\n" , plant,baseSeedCost[plant],round+1,seedCost[plant][round],baseMarketPrice[plant],marketPrice[plant][round]);
 			}
 		}		
 	}
@@ -327,5 +363,27 @@ public class Main {
 		number=number/Math.pow(10, digits);
 		return number;
 	}
+
+	public static void promptEnterKey(){
+	    System.out.format("Press ENTER to continue.");
+	    try {
+			@SuppressWarnings("resource")
+			Scanner in = new Scanner (System.in);
+			@SuppressWarnings("unused")
+			String input=in.nextLine();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	}
 	
+	public static void textToConsole(String fn) throws IOException {
+		BufferedReader in = new BufferedReader(new FileReader(fn));
+		String line = in.readLine();
+		while(line != null)
+		{
+		  System.out.println(line);
+		  line = in.readLine();
+		}
+		in.close();		
+	}
 }

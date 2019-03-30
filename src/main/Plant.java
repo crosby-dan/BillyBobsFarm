@@ -14,11 +14,6 @@ public abstract class Plant {
 	protected int maturityRound;
 	protected int maxHarvestRound;
 	protected int purchaseRound;
-	
-	// TODO Leanne Implement Carrot class based on Watermelon
-	// TODO Leanne Implement Corn class based on Watermelon
-	// TODO Leanne Implement Tomato class based on Watermelon
-	// TODO Leanne Implement Potato class based on Watermelon
 
 	//Constructor for the plant class
 	//Which will tally the costs & space required and throw an error if necessary.
@@ -47,12 +42,12 @@ public abstract class Plant {
 	{
 		int productionImpact=0;
 		//Check to see if the tractor broke- probability 30%, impact from 1 to 40% of production reduced
-		if (maturityRound==Main.currentRound) {
-			System.out.format("%d %s plant(s) are ready for harvest!", plantQuantity, getType());
+		if (Main.currentRound>=maturityRound && Main.currentRound<=maxHarvestRound) {
+			System.out.format("%d %s plant(s) are ready for harvest!\n", plantQuantity, getType());
 			
 			// Check for any tractor issues
 			if ((Math.random()*100)>70) {
-				//If a tractor issue occurs, reduce round revenues by up to 30%.
+				//If a tractor issue occurs, reduce round revenues by up to 40%.
 				productionImpact=(int)(40*Math.random())+1;
 				//check for a portion of plants destroyed
 				try {
@@ -61,18 +56,16 @@ public abstract class Plant {
 				catch (Exception ex) {
 					//not important if this fails so not doing anything
 				}
-				System.out.format("Billy Bob's tractor broke and reduced your revenues by %d%%.", productionImpact);
+				System.out.format("Billy Bob's tractor broke and reduced your revenues by %d%%.\n", productionImpact);
 			}
-			
-			// TODO Leanne - Check to see if there is a late frost (or maybe we implement this as "great weather" that can boost productivity.
-
+			//System.out.format("DEBUG: ((100.0-productionImpact)/100)=%d\n" , ((100-productionImpact)/100));
 			//Calculate money earned
-			float cashEarned = (float) (plantQuantity * Main.marketPrice[getIndex()][Main.currentRound] * ((100-productionImpact)/100));
+			float cashEarned = (float) (plantQuantity * Main.marketPrice[getIndex()][Main.currentRound] * ((100.0-productionImpact)/100.0));
 			Main.farmList.get(Main.currentFarm).changeCash(cashEarned);
 			//If plant is available for a single harvest only, then reduce the square footage and plantQuantity
 
 			// TODO Leanne - Add code to display treasure chest (See try catch block above for tractor.txt)
-			System.out.format("Congratulations, you have earned %5.2f from your round %d %s plant(s).\n", cashEarned, purchaseRound, getType());
+			System.out.format("Congratulations, you have earned %5.2f from your %d %s plant(s) planted in round %d plant(s).\n", cashEarned, plantQuantity, getType(), purchaseRound);
 		}
 	}
 	abstract int getIndex();

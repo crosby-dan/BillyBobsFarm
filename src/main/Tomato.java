@@ -4,19 +4,19 @@ package main;
 		 * Custom class for Carrots which has an "Is-A" relationship to a Plant.
 		 */
 		public class Tomato extends Plant {
-			final private int plantIndex=1;
-			final private String plantName="Tomato";
+			final private static int plantIndex=1;
+			final private static String plantName="Tomato";
 
 			//constructor 
 			Tomato(int quantity) {
 					//Any method which calls this constructor must trap any exceptions that result
-					super(1,quantity);
-					//Recording when these plants will be available for harvest.
-					super.maturityRound=Main.currentRound+1;
+					super(plantIndex,quantity);
 					//Recording the round when these plant(s) were purchased for posterity sake.
 					super.purchaseRound=Main.currentRound;
-					//Plants will yield harvest until this date.
-					super.maxHarvestRound=maturityRound+Main.harvestRounds[plantIndex];
+					//Recording when these plants will be available for harvest.
+					super.maturityRound=Main.currentRound+Main.maturityRounds[plantIndex]-1;
+					//Recording until which round these plants will continue to yield fruit
+					super.maxHarvestRound=maturityRound+Main.harvestRounds[plantIndex]-1;	
 					System.out.format("Thank you for purchasing %d Tomato seed(s), which are now growing (1/2).\n", quantity);
 					}
 			@Override
@@ -32,7 +32,7 @@ package main;
 			@Override
 			public void checkPlantProgress()
 			{
-				System.out.format("Max Harvest Round=%d\n",super.maxHarvestRound);
+				//System.out.format("Debug %s purchased round %d maturity round %d max harvest round %d\n",plantName,super.purchaseRound,super.maturityRound,super.maxHarvestRound);
 				if (super.plantQuantity<1) return;
 				if (super.maxHarvestRound<Main.currentRound) {
 					int plantsDestroyed=super.plantQuantity;
@@ -42,25 +42,35 @@ package main;
 					super.plantQuantity=0;
 				}
 
-				// Check to see if the tomato patch was hit by a tractor
+				// Check to see if the tomato patch has tomato bugs
 				//If yes, reduce the plantQuantity for any plants killed as appropriate
-				//A chance of a tractor in any given round
-				if ((Math.random()*100)>45) {
+				if ((Math.random()*100)>75 && super.plantQuantity>0) {
 					//If a tractor occurs, there will be an evenly weighted chance for the number of plants destroyed.
 					int plantsDestroyed=(int)(super.plantQuantity*Math.random())+1;
 					//check for a portion of plants destroyed
 					try {
-						Main.textToConsole("img/tractor.txt");
+						Main.textToConsole("img/tomatobug.txt");
 					}
 					catch (Exception ex) {
 						//not important if this fails so not doing anything
 					}
-					System.out.format("Your tomato patch has been run over by a tractor, and %d of %d plants were destroyed!", plantsDestroyed,super.plantQuantity);
+					System.out.format("Tomato bugs have booked AirB&B in your garden, and %d of %d plants are destroyed!", plantsDestroyed,super.plantQuantity);
 					super.plantQuantity-=plantsDestroyed;
 					//Decrease the amount of space used based on plants destroyed
 					Main.farmList.get(Main.currentFarm).changeSpace(-1*plantsDestroyed*Main.squareFootage[plantIndex]);
 				}
+		
+				if (Main.currentRound>=super.maturityRound && Main.currentRound<=super.maxHarvestRound && super.plantQuantity>0) {
+					//System.out.format("%d tomato plant(s) are ready for harvest! (2/2).", super.plantQuantity);
+					super.checkPlantProgress();
+					return;
+				}
+				if (super.maturityRound==Main.currentRound+1 && super.plantQuantity>0) {
+					System.out.format("%d tomato plant(s) are producing tiny, green tomatoes (1/2).", super.plantQuantity);
+				}
 			}
-	}
+
+		
+		}
 
 

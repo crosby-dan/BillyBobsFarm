@@ -6,19 +6,19 @@ package main;
  * Custom class for Watermelons which has an "Is-A" relationship to a Plant.
  */
 public class Watermelon extends Plant {
-	final private int plantIndex=4;
-	final private String plantName="Watermelon";
+	final private static int plantIndex=4;
+	final private static String plantName="Watermelon";
 
 	//constructor 
 	Watermelon(int quantity) {
 		//Any method which calls this constructor must trap any exceptions that result
-		super(4,quantity);
-		//Recording when these plants will be available for harvest.
-		super.maturityRound=Main.currentRound+4;
+		super(plantIndex,quantity);
 		//Recording the round when these plant(s) were purchased for posterity sake.
 		super.purchaseRound=Main.currentRound;
-		//Plants will yield harvest until this date.
-		super.maxHarvestRound=maturityRound+Main.harvestRounds[plantIndex];
+		//Recording when these plants will be available for harvest.
+		super.maturityRound=Main.currentRound+Main.maturityRounds[plantIndex]-1;
+		//Recording until which round these plants will continue to yield fruit
+		super.maxHarvestRound=maturityRound+Main.harvestRounds[plantIndex]-1;
 		System.out.format("Thank you for purchasing %d watermelon seed(s), which are now germinating (1/5).\n", quantity);
 	}
 	
@@ -35,7 +35,7 @@ public class Watermelon extends Plant {
 	@Override
 	public void checkPlantProgress()
 	{
-		System.out.format("Max Harvest Round=%d\n",super.maxHarvestRound);
+		//System.out.format("Debug %s purchased round %d maturity round %d max harvest round %d\n",plantName,super.purchaseRound,super.maturityRound,super.maxHarvestRound);
 		if (super.plantQuantity<1) return;
 		if (super.maxHarvestRound<Main.currentRound) {
 			int plantsDestroyed=super.plantQuantity;
@@ -48,7 +48,7 @@ public class Watermelon extends Plant {
 		// Check to see if the watermelon patch was hit by a tornado
 		//If yes, reduce the plantQuantity for any plants killed as appropriate
 		//A 8% chance of a tornado in any given round
-		if ((Math.random()*100)>92) {
+		if ((Math.random()*100)>85) {
 			//If a tornado occur, there will be an evenly weighted chance for the number of plants destroyed.
 			int plantsDestroyed=(int)(super.plantQuantity*Math.random())+1;
 			//check for a portion of plants destroyed
@@ -58,28 +58,28 @@ public class Watermelon extends Plant {
 			catch (Exception ex) {
 				//not important if this fails so not doing anything
 			}
-			System.out.format("Your watermelon patch has been hit by a tornado, and %d of %d plants were destroyed!", plantsDestroyed,super.plantQuantity);
+			System.out.format("Your watermelon patch has been hit by a tornado, and %d of %d plants were destroyed!\n", plantsDestroyed,super.plantQuantity);
 			super.plantQuantity-=plantsDestroyed;
 			//Decrease the amount of space used based on plants destroyed
 			Main.farmList.get(Main.currentFarm).changeSpace(-1*plantsDestroyed*Main.squareFootage[plantIndex]);
 		}
 		
-		if (super.maturityRound==Main.currentRound) {
+		if (Main.currentRound>=super.maturityRound && Main.currentRound<=super.maxHarvestRound) {
 			//System.out.format("%d watermelon plant(s) are ready for harvest! (5/5).", super.plantQuantity);
 			super.checkPlantProgress();
 			return;
 		}
 		if (super.maturityRound==Main.currentRound+1) {
-			System.out.format("%d watermelon plant(s) are now fruiting (4/5).", super.plantQuantity);
+			System.out.format("%d watermelon plant(s) are now growing fruit (4/5).\n", super.plantQuantity);
 		}
 		else if (super.maturityRound==Main.currentRound+2) {
-			System.out.format("%d watermelon plant(s) are now flowering (3/5).", super.plantQuantity);
+			System.out.format("%d watermelon plant(s) are now blossoming (3/5).\n", super.plantQuantity);
 		}
 		else if (super.maturityRound==Main.currentRound+3) {
-			System.out.format("%d watermelon plant(s) are now vining (2/5).", super.plantQuantity);
+			System.out.format("%d watermelon plant(s) are now vining (2/5).\n", super.plantQuantity);
 		}
 		else if (super.maturityRound==Main.currentRound+4) {
-			System.out.format("%d watermelon plant(s) are now germinating (1/5).", super.plantQuantity);
+			System.out.format("%d watermelon plant(s) are now germinating (1/5).\n", super.plantQuantity);
 		}
 	}
 }

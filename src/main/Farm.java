@@ -7,7 +7,7 @@ import java.util.ArrayList;
 //TODO Add method javadoc prefixes like in Main
 
 /**
- * @author Dan Crosby & Leanne Thornton
+ * @author Dan Crosby & Leanne Kendrick
  * Each player will have their own farm.  (The correct farm can be selected using the Main.currentFarm variable)
  * The main class will have an ArrayList of type ArrayList<Farm>
  * To access the appropriate Farm use farmList.get(Main.currentFarm)
@@ -88,19 +88,23 @@ public class Farm {
 
 	protected void addPlant(int plant, int qty) {
 		switch (plant) {
+		
 		case 0: 
-			// TODO Leanne - replace these "not implemented" lines with calls to add the appropriate vegetable (like it is on case 4:).
-			System.out.format("Plant %s not implemented.",Main.plants[plant]);
-			break;
+			this.plantList.add(new Carrot (qty));
+		    break;
+			
 		case 1: 
-			System.out.format("Plant %s not implemented.",Main.plants[plant]);
+			this.plantList.add(new Tomato (qty));
 			break;
+			
 		case 2: 
-			System.out.format("Plant %s not implemented.",Main.plants[plant]);
+			this.plantList.add(new Potato (qty));
 			break;
+			
 		case 3: 
-			System.out.format("Plant %s not implemented.",Main.plants[plant]);
+			this.plantList.add(new Corn (qty));
 			break;
+			
 		case 4: 
 			this.plantList.add(new Watermelon(qty));
 			//System.out.format("Added new watermelon.  New list count=%d.\n",plantList.size());

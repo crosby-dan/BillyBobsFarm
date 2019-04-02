@@ -16,7 +16,7 @@ public class Main {
 	private static int playerCount;
 	
 	//Initialize global properties
-	final static int maxRounds=10;
+	final static int maxRounds=3;
 	final static int totalSquareFeet=25;
 	final static double startingMoney=2;
 	
@@ -184,7 +184,7 @@ public class Main {
 				"                    $$$$$$/                                                                              \r\n"  );
 		
 
-		//Add code here to open high score files and then print it out to the console.
+		//TODO Add code here to open high score files and then print it out to the console.
 	}
 	
 	/**
@@ -213,13 +213,26 @@ public class Main {
 			    farmList.get(currentFarm).processRound();
 			}
 		}
+		
+		for (currentFarm=0; currentFarm<farmList.size(); currentFarm++) {
+			try {
+				Main.textToConsole("img/treasure.txt");
+			}
+			catch (Exception ex) {
+				//not important if this fails so not doing anything
+			}
+			System.out.format("------------------------------------------\n");
+			System.out.format("---Player %s  You earned $%5.2f  ----------\n",farmList.get(currentFarm).getPlayerName(),farmList.get(Main.currentFarm).getPlayerCash());
+			System.out.format("--------Thank you for playing!!!----------\n");
+			System.out.format("------------------------------------------\n");
+		}		
 	}
 	
 	/**
 	 * Loops through each player and gathers input for commands that can be processed by each player
 	 * in each round.
 	 * @param int round The number of the round being processed
-	 * @return      void
+	 * @return      boolean (If false then the round failed)
 	 */
 	public static boolean processGameRound() {
 		
@@ -294,6 +307,8 @@ public class Main {
 	 */
 	private static void showPrices() {
 		//clear some blank lines so that the rounds don't blend together in the output
+		if (currentRound>maxRounds-1) return;
+		
 		System.out.println("\n\n\n\n\n\n\n\n");
 		//show the seed & vegetable market information
 		System.out.format("**-----------------------------------------------------------------------------------------**\n");

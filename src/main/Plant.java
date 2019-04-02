@@ -58,14 +58,16 @@ public abstract class Plant {
 				}
 				System.out.format("Billy Bob's tractor broke and reduced your revenues by %d%%.\n", productionImpact);
 			}
-			//System.out.format("DEBUG: ((100.0-productionImpact)/100)=%d\n" , ((100-productionImpact)/100));
+			//System.out.format("DEBUG: Plant Quantity %d ((100.0-productionImpact)/100)=%d\n" ,plantQuantity, ((100-productionImpact)/100));
+			//System.out.format("DEBUG: Index %d Round %d\n" ,getIndex(),Main.currentRound );
+			//System.out.format("DEBUG: Market Price %5.2f\n" ,Main.marketPrice[getIndex()][Main.currentRound-1] );
 			//Calculate money earned
-			float cashEarned = (float) (plantQuantity * Main.marketPrice[getIndex()][Main.currentRound] * ((100.0-productionImpact)/100.0));
+			float cashEarned = (float) (plantQuantity * Main.marketPrice[getIndex()][Main.currentRound-1] * ((100.0-productionImpact)/100.0));
 			Main.farmList.get(Main.currentFarm).changeCash(cashEarned);
 			//If plant is available for a single harvest only, then reduce the square footage and plantQuantity
 
 			// TODO Leanne - Add code to display treasure chest (See try catch block above for tractor.txt)
-			System.out.format("Congratulations, you have earned %5.2f from your %d %s plant(s) planted in round %d plant(s).\n", cashEarned, plantQuantity, getType(), purchaseRound);
+			System.out.format("Congratulations, you have earned %5.2f from your %d %s plant(s) planted in round %d.\n", cashEarned, plantQuantity, getType(), purchaseRound);
 		}
 	}
 	abstract int getIndex();

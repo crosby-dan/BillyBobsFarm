@@ -9,7 +9,10 @@ public class Watermelon extends Plant {
 	final private static int plantIndex=4;
 	final private static String plantName="Watermelon";
 
-	//constructor 
+	/**
+	 * Create an instance of the Watermelon class 
+	 * @param int quantity - The number of watermelons
+	 */
 	Watermelon(int quantity) {
 		//Any method which calls this constructor must trap any exceptions that result
 		super(plantIndex,quantity);
@@ -22,11 +25,19 @@ public class Watermelon extends Plant {
 		System.out.format("Thank you for purchasing %d watermelon seed(s), which are now germinating (1/5).\n", quantity);
 	}
 	
+	/**
+	 * Return the type of the class, which overrides the Plant class 
+	 * @return String - the name of the plant
+	 */
 	@Override
 	String getType() {
 		return plantName;
 	}
 
+	/**
+	 * Return the type of the class, which overrides the Plant class 
+	 * @return int - the ID of the plant
+	 */
 	@Override
 	int getIndex() {
 		return plantIndex;

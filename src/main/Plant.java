@@ -1,6 +1,4 @@
 package main;
-//TODO Add method javadoc prefixes like in Main
-
 /**
  * @author Dan Crosby & Leanne Thornton
  * Class for Plant objects, which are extended by the different plant types.
@@ -23,11 +21,11 @@ public abstract class Plant {
 	protected int maxHarvestRound;
 
 	/**
-	 * Create an instance of the Plant class 
+	 * The Plant method (constructor)
+	 * Purpose:  Constructor to create an instance of the Plant class 
 	 * @param int plant - types of plant
 	 * @param int quantity - how many plants
 	 */
-	//Which will tally the costs & space required and throw an error if necessary.
 	Plant (int plant,int quantity) {
 		this.plantQuantity=quantity;
 		purchaseCost=Main.seedCost[plant][Main.currentRound]*quantity;
@@ -50,7 +48,8 @@ public abstract class Plant {
 	}
 	
 	/**
-	 * Method to check the progress of a plant at the end of each round.
+	 * The checkPlantProgress method
+	 * Purpose: To check the progress of a plant at the end of each round.
 	 */
 	public void checkPlantProgress()
 	{
@@ -94,14 +93,16 @@ public abstract class Plant {
 	}
 	
 	/**
-	 * Abstract method - all methods that extend Plant will have to implement a getIndex
-	 * @return int - (The index of the plant)
+	 * The getIndex abstract method
+	 * Purpose: All methods that extend Plant will have to implement a getIndex
+	 * @return The integer  index of the plant
 	 */
 	abstract int getIndex();
 
 	/**
-	 * Abstract method - all methods that extend Plant will have to implement a getType
-	 * @return String - (The name of the plant)
+	 * The getType abstract method
+	 * Purpose: All methods that extend Plant will have to implement a getType
+	 * @return The String name of the plant
 	 */
 	abstract String getType();
 }

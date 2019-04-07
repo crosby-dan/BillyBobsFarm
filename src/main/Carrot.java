@@ -1,3 +1,4 @@
+
 package main;
 
 /**
@@ -11,8 +12,9 @@ public class Carrot extends Plant {
 	final private static String plantName="Carrot";
 
 	/**
-	 * Create an instance of the Carrot class 
-	 * @param int quantity - The number of carrots
+	 * The Carrot method (constructor)
+	 * Purpose: Create an instance of the Carrot class 
+	 * @param Quantity - The integer number of carrots to add
 	 */ 
 	Carrot(int quantity) {
 			//Any method which calls this constructor must trap any exceptions that result
@@ -27,8 +29,9 @@ public class Carrot extends Plant {
 			}
 	
 	/**
-	 * Return the type of the class, which overrides the Plant class 
-	 * @return String - the name of the plant
+	 * The getType method 
+	 * Purpose:  Return the type of the class, which overrides the Plant class 
+	 * @return The String name of the plant
 	 */
 	@Override
 	String getType() {
@@ -36,16 +39,18 @@ public class Carrot extends Plant {
 	}
 	
 	/**
-	 * Return the type of the class, which overrides the Plant class 
-	 * @return int - the ID of the plant
+	 * The getIndex method
+	 * Purpose: Return the type of the class, which overrides the Plant class 
+	 * @return The integer ID of the plant
 	 */
 	@Override
 	int getIndex() {
 		return plantIndex;
 	}
-	
+
 	/**
-	 * At the end of each round, this method will be called on each carrot purchas
+	 * The checkPlantProgress method
+	 * Purpose: At the end of each round, this method will be called on each carrot purchase
 	 * If a harvest occurs, increase cash
 	 * If a disaster occurs, decrease plant quantity
 	 * If maxHarvestRounds exceeded, decrease plant quantity to zero
@@ -101,6 +106,7 @@ public class Carrot extends Plant {
 			Main.farmList.get(Main.currentFarm).changeSpace(-1*plantsDestroyed*Main.squareFootage[plantIndex]);
 		}
 
+		//If there are still any plants left at this point, then go ahead and call the checkPlantProgress of the base Plant class.
 		if (Main.currentRound>=super.maturityRound && Main.currentRound<=super.maxHarvestRound && super.plantQuantity>0) {
 			//System.out.format("%d carrot plant(s) are ready for harvest! (1/1).\n", super.plantQuantity);
 			super.checkPlantProgress();

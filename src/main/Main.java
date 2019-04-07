@@ -21,34 +21,52 @@ import java.util.regex.Matcher;
  *  --   properties, and when the game play proceeds different disasters can affect different types of plants.
  */
 public class Main {
-
+	//Declare global variables that will be used throughout the app.
+	//The farmList will hold a collection of Farms (and a player is a property of a farm)
 	protected static ArrayList<Farm> farmList = new ArrayList<>();
+	//playerCount will be a value from 1 to 4.
 	private static int playerCount;
 	
 	//Initialize global properties
-	final static int maxRounds=3;
+	//The maximum number of game rounds.
+	final static int maxRounds=10;
+	//The amount of square feet that will be available in each farm.
 	final static int totalSquareFeet=25;
+	//The amount of starting cash that each player will have.
 	final static double startingMoney=2;
-	
-	//Arrays to initialize plant level properties
-	final static String[] plants = { "Carrot", "Tomato", "Potato", "Corn", "Watermelon"};
-	final static double[] squareFootage = {.2,1,.5,.5,5};
 
+	//Arrays to initialize plant level properties.   Note that these are simply initializer values, 
+	//   and this should not take away from the fact that the vegetable specific plants have their.
+	//   own instances of these values.
+
+	//This is the number of square feet that each plant will take
+	final static String[] plants = { "Carrot", "Tomato", "Potato", "Corn", "Watermelon"};
+	//This is the number of square feet that each plant will take
+	final static double[] squareFootage = {.2,1,.5,.5,5};
 	//This is how many rounds before plant will be mature.
 	final static int[] maturityRounds = {1,2,2,3,5};
-
 	//Plants will continue to produce fruit for this many rounds.
 	final static int[] harvestRounds = {1, 5, 1, 3, 2};
-
+	//Base costs for each type of plant.
 	final static double[] baseSeedCost = {.02,.15,.20,.10,.25};
+	//Base market price for each type of plant.
 	final static double[] baseMarketPrice = {.20,1.5,1,.75,7.5};
 
+	//Rather than using the same boring price every round, this game
+	//uses random numbers to raise and lower the costs & market prices for each round.
+	//The following 2 arrays will hold these calculated values which are calculated 
+	//at the beginning of each game by calling seedCost();
 	
 	//Array element 1=plant, 2=round
 	static double[][] seedCost;
 	//Array element 1=plant, 2=round
 	static double[][] marketPrice;
+	
+	//Global variables to track the current game progress
+
+	//The number of the current round
 	static int currentRound;
+	//The index of the currently selected farm
 	static int currentFarm;
 	
 	/**

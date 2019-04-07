@@ -1,5 +1,4 @@
 package main;
-//TODO Add method javadoc prefixes like in Main
 
 /**
  * @author Dan Crosby & Leanne Kendrick
@@ -28,8 +27,9 @@ public class Watermelon extends Plant {
 	}
 	
 	/**
-	 * Return the type of the class, which overrides the Plant class 
-	 * @return String - the name of the plant
+	 * The getType method 
+	 * Purpose:  Return the type of the class, which overrides the Plant class 
+	 * @return The String name of the plant
 	 */
 	@Override
 	String getType() {
@@ -37,8 +37,9 @@ public class Watermelon extends Plant {
 	}
 
 	/**
-	 * Return the type of the class, which overrides the Plant class 
-	 * @return int - the ID of the plant
+	 * The getIndex method
+	 * Purpose: Return the type of the class, which overrides the Plant class 
+	 * @return The integer ID of the plant
 	 */
 	@Override
 	int getIndex() {
@@ -46,7 +47,8 @@ public class Watermelon extends Plant {
 	}
 
 	/**
-	 * At the end of each round, this method will be called on each carrot purchas
+	 * The checkPlantProgress method
+	 * Purpose: At the end of each round, this method will be called on each watermelon purchase
 	 * If a harvest occurs, increase cash
 	 * If a disaster occurs, decrease plant quantity
 	 * If maxHarvestRounds exceeded, decrease plant quantity to zero
@@ -82,12 +84,15 @@ public class Watermelon extends Plant {
 			//Decrease the amount of space used based on plants destroyed
 			Main.farmList.get(Main.currentFarm).changeSpace(-1*plantsDestroyed*Main.squareFootage[plantIndex]);
 		}
-		
+
+		//If there are still any plants left at this point, then go ahead and call the checkPlantProgress of the base Plant class.
 		if (Main.currentRound>=super.maturityRound && Main.currentRound<=super.maxHarvestRound) {
 			//System.out.format("%d watermelon plant(s) are ready for harvest! (5/5).", super.plantQuantity);
 			super.checkPlantProgress();
 			return;
 		}
+
+		//Display progress messages on any plants not yet mature.
 		if (super.maturityRound==Main.currentRound+1) {
 			System.out.format("%d watermelon plant(s) are now growing fruit (4/5).\n", super.plantQuantity);
 		}

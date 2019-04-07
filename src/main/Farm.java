@@ -1,10 +1,6 @@
-/**
- * 
- */
 package main;
 
 import java.util.ArrayList;
-//TODO Add method javadoc prefixes like in Main
 
 /**
  * @author Dan Crosby & Leanne Kendrick
@@ -29,10 +25,11 @@ public class Farm {
 	protected ArrayList<Plant> plantList = new ArrayList<>();
 
 	/**
-	 * Create an instance of the Farm class 
-	 * @param String playerName - name of the player
-	 * @param int farmSize - how much space their will be
-	 * @param double playerCash - how much money the player will have
+	 * The Farm method (constructor)
+	 * Purpose: Create an instance of the Farm class 
+	 * @param playerName String name of the player
+	 * @param farmSize integer size for how much space there will be
+	 * @param playerCash - how much money (double) the player will have
 	 */
 	Farm (String playerName,int farmSize, double playerCash)
 	{
@@ -42,31 +39,35 @@ public class Farm {
 	}
 
 	/**
-	 * Getter to return the name of the player 
-	 * @return String - name of the player
+	 * The getPlayerName method
+	 * Purpose: Getter to return the name of the player 
+	 * @return name of the player
 	 */
 	public String getPlayerName() {
 		return this.playerName;
 	}
 	
 	/**
-	 * Getter to return the amount of cash the player has 
-	 * @return double - current cash amount
+	 * The getPlayer cash method
+	 * Purpose: Getter to return the amount of cash the player has 
+	 * @return current cash amount
 	 */
 	public double getPlayerCash() {
 		return this.playerCash;
 	}
 	
 	/**
-	 * Getter to return the amount of farm space available
-	 * @return double - current space available
+	 * The getSpaceAvailable method
+	 * Purpose: Getter to return the amount of farm space available
+	 * @return current space available
 	 */
 	public double getSpaceAvailable() {
 		return this.farmSize-spaceUsed;
 	}
 	
 	/**
-	 * Getter to return the total farm size
+	 * The getFarmSize method
+	 * Purpose: Getter to return the total farm size
 	 * @return double - current farm size
 	 */
 	public double getFarmSize() {
@@ -74,17 +75,18 @@ public class Farm {
 	}
 	
 	/**
-	 * Setter to change the amount of player cash
+	 * The changeCash method
+	 * Purpose: Setter to change the amount of player cash
 	 * @param double - change current player cash amount
 	 */
 	protected void changeCash(double amount) {
 		// TODO Throw exception if cash will be less than zero
-		
 		this.playerCash+=amount;
 	}
 	
 	/**
-	 * Setter to change the amount of available space
+	 * The changeSpace method
+	 * Purpose: Setter to change the amount of available space
 	 * @param double - change current farm available space
 	 */
 	protected void changeSpace(double space) {
@@ -94,7 +96,8 @@ public class Farm {
 	}
 	
 	/**
-	 * At the end of each round, call this method 
+	 * The processRound method
+	 * Purpose: At the end of each round, call this method 
 	 * Method will loop through each plant use the checkPlantProgress, which is polymorphic
 	 */
 	public void processRound ()
@@ -108,7 +111,8 @@ public class Farm {
 	}
 
 	/**
-	 * Getter for counting the number of plants of a certain name.
+	 * The getCount method
+	 * Purpose: Getter for counting the number of plants of a certain name.
 	 * @param String - the name of the plant to check
 	 * @return int - the count of plants
 	 */
@@ -122,7 +126,8 @@ public class Farm {
 	}
 
 	/**
-	 * Method to create custom plant objects for use in polymorphism
+	 * The addPlant method
+	 * Purpose: Method to create custom plant objects for use in polymorphism
 	 * @param int - the index of the plant to add
 	 * @param int - the count of plants
 	 */

@@ -8,14 +8,25 @@ package main;
  * An ArrayList of type ArrayList<Plant> is contained in the Farm class.
  */
 public abstract class Plant {
+	//The number of plants purchased, which is independent of type of plant
 	protected int plantQuantity;
+	//The amount of space used, which is updated up on the purchase of a specific plant
 	protected double spaceUsed;
-	protected double purchaseCost;
-	protected int maturityRound;
-	protected int maxHarvestRound;
-	protected int purchaseRound;
 
-	//Constructor for the plant class
+	//The round number when this plant was purchased, which is updated up on the purchase of a specific plant
+	protected int purchaseRound;
+	//The amount of money that was spent to purchase the plant, which is updated up on the purchase of a specific plant
+	protected double purchaseCost;
+	//The round number when this plant will begin harvesting, which is updated up on the purchase of a specific plant
+	protected int maturityRound;
+	//The round number when this plant will end harvesting, which is updated up on the purchase of a specific plant
+	protected int maxHarvestRound;
+
+	/**
+	 * Create an instance of the Plant class 
+	 * @param int plant - types of plant
+	 * @param int quantity - how many plants
+	 */
 	//Which will tally the costs & space required and throw an error if necessary.
 	Plant (int plant,int quantity) {
 		this.plantQuantity=quantity;
@@ -38,8 +49,12 @@ public abstract class Plant {
 		//System.out.format("Purchased %d of %s seed(s) for %5.2f.  Player cash is %5.2f, available space is %5.1f.\n",quantity,getType(),plantCost,Main.farmList.get(Main.currentFarm).playerCash,Main.totalSquareFeet-Main.farmList.get(Main.currentFarm).spaceUsed);
 	}
 	
+	/**
+	 * Method to check the progress of a plant at the end of each round.
+	 */
 	public void checkPlantProgress()
 	{
+		//productionImpact is a temporary variable calculated via random number generator if plants are to be destroyed
 		int productionImpact=0;
 		//Check to see if the tractor broke- probability 30%, impact from 1 to 40% of production reduced
 		if (Main.currentRound>=maturityRound && Main.currentRound<=maxHarvestRound) {
@@ -67,9 +82,26 @@ public abstract class Plant {
 			//If plant is available for a single harvest only, then reduce the square footage and plantQuantity
 
 			// TODO Leanne - Add code to display treasure chest (See try catch block above for tractor.txt)
+			
+				try {
+					Main.textToConsole("img/treasure.txt");
+				}
+				catch (Exception ex) {
+					//not important if this fails so not doing anything
+				}
 			System.out.format("Congratulations, you have earned %5.2f from your %d %s plant(s) planted in round %d.\n", cashEarned, plantQuantity, getType(), purchaseRound);
 		}
 	}
+	
+	/**
+	 * Abstract method - all methods that extend Plant will have to implement a getIndex
+	 * @return int - (The index of the plant)
+	 */
 	abstract int getIndex();
+
+	/**
+	 * Abstract method - all methods that extend Plant will have to implement a getType
+	 * @return String - (The name of the plant)
+	 */
 	abstract String getType();
 }

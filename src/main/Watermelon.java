@@ -2,11 +2,13 @@ package main;
 //TODO Add method javadoc prefixes like in Main
 
 /**
- * @author Dan Crosby & Leanne Thornton
+ * @author Dan Crosby & Leanne Kendrick
  * Custom class for Watermelons which has an "Is-A" relationship to a Plant.
  */
 public class Watermelon extends Plant {
+	//plantIndex is a number from 0 to 4 that identifies the plant.
 	final private static int plantIndex=4;
+	//plantName is a String identifies the plant.
 	final private static String plantName="Watermelon";
 
 	/**
@@ -43,6 +45,12 @@ public class Watermelon extends Plant {
 		return plantIndex;
 	}
 
+	/**
+	 * At the end of each round, this method will be called on each carrot purchas
+	 * If a harvest occurs, increase cash
+	 * If a disaster occurs, decrease plant quantity
+	 * If maxHarvestRounds exceeded, decrease plant quantity to zero
+	 */
 	@Override
 	public void checkPlantProgress()
 	{

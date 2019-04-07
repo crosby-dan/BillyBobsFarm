@@ -10,6 +10,16 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 //import java.util.Random; 
 
+/**
+ * @author Dan Crosby & Leanne Kendrick
+ * This Main class will be the class that controls program flow for Billy Bob's Farm.
+ * This class will also contain some global variables and initializers to help setup properties for the objects.
+ * Objects that will be manipulated by the main class include:
+ * 	--Farm class - An instance of farm will be associated with a player and players can purchase plants.
+ * 	--Plant class - An instance of a class can be associated with a farm during game play.
+ *  --Watermelon, Corn, Carrot, Potato and Tomato classes are all classes that extend Plant with custom
+ *  --   properties, and when the game play proceeds different disasters can affect different types of plants.
+ */
 public class Main {
 
 	protected static ArrayList<Farm> farmList = new ArrayList<>();
@@ -222,7 +232,7 @@ public class Main {
 				//not important if this fails so not doing anything
 			}
 			System.out.format("------------------------------------------\n");
-			System.out.format("---Player %s  You earned $%5.2f  ----------\n",farmList.get(currentFarm).getPlayerName(),farmList.get(Main.currentFarm).getPlayerCash());
+			System.out.format("---Player %s  You earned $%5.2f  ---------\n",farmList.get(currentFarm).getPlayerName(),farmList.get(Main.currentFarm).getPlayerCash());
 			System.out.format("--------Thank you for playing!!!----------\n");
 			System.out.format("------------------------------------------\n");
 		}		

@@ -4,7 +4,7 @@ package main;
  * @author Leanne Kendrick
  *
  */
-
-public class NotEnoughLandException {
-   //Leanne - please implement this custom exception similar to NotEnoughMoneyException.
+@SuppressWarnings("serial")
+public class NotEnoughLandException extends RuntimeException {
+   // TODO Leanne - please implement this custom exception similar to NotEnoughMoneyException.
 }

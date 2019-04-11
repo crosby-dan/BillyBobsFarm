@@ -79,15 +79,12 @@ public abstract class Plant {
 			float cashEarned = (float) (plantQuantity * Main.marketPrice[getIndex()][Main.currentRound-1] * ((100.0-productionImpact)/100.0));
 			Main.farmList.get(Main.currentFarm).changeCash(cashEarned);
 			//If plant is available for a single harvest only, then reduce the square footage and plantQuantity
-
-			// TODO Leanne - Add code to display treasure chest (See try catch block above for tractor.txt)
-			
-				try {
-					Main.textToConsole("img/treasure.txt");
-				}
-				catch (Exception ex) {
-					//not important if this fails so not doing anything
-				}
+			try {
+				Main.textToConsole("img/treasure.txt");
+			}
+			catch (Exception ex) {
+				//not important if this fails so not doing anything
+			}
 			System.out.format("Congratulations, you have earned %5.2f from your %d %s plant(s) planted in round %d.\n", cashEarned, plantQuantity, getType(), purchaseRound);
 		}
 	}

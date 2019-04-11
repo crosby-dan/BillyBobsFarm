@@ -8,7 +8,6 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-//import java.util.Random; 
 
 /**
  * @author Dan Crosby & Leanne Kendrick
@@ -70,7 +69,8 @@ public class Main {
 	static int currentFarm;
 	
 	/**
-	 * Main program execution thread
+	 * The main method
+	 * Purpose:  Main program execution thread - identify players, launch menu commands.
 	 * @param String[] args - which are not used in this method.
 	 * @return      void
 	 */
@@ -131,13 +131,13 @@ public class Main {
 			farmList.add(new Farm(matcher.group(1),totalSquareFeet,startingMoney));
 		}
 
-		//System.out.format("Example of using the seedCost array for Watermelon: %s\n", getPlantIndex("Watermelon"));
-		//System.out.format("Example of using the seedCost array for Carrot: %s\n", getPlantIndex("Carrot"));
+		//System.out.format("DEBUG: Example of using the seedCost array for Watermelon: %s\n", getPlantIndex("Watermelon"));
 		MainMenu();
 	}
 	
 	/**
-	 * Loops through each of the "plants" array and if the provided plant name matches, return the index.
+	 * The getPlantIndex method
+	 * Purpose:  Loops through each of the "plants" array and if the provided plant name matches, return the index.
 	 * @param String plantName
 	 * @return int
 	 */	
@@ -149,13 +149,13 @@ public class Main {
 			else
 				i++;
 		}
-		System.out.format("Error: Failed to locate plant named '%s'.  Valid values include: %s\n",plantName,Arrays.toString(plants));
-		// TODO Leanne - replace this with one of the new custom Exception classes.
+		//System.out.format("Error: Failed to locate plant named '%s'.  Valid values include: %s\n",plantName,Arrays.toString(plants));
 		throw new NoSuchElementException();
 	}
 		
 	/**
-	 * Main menu with options for high scores, quit, and play game.
+	 * The MainMenu method
+	 * Purpose: Main menu with options for high scores, quit, and play game.
 	 * @return      void
 	 */
 	private static void MainMenu() {
@@ -193,7 +193,8 @@ public class Main {
 	}
 	
 	/**
-	 * Display high scores from file
+	 * The highScores method
+	 * Purpose: Display high scores from file, if present
 	 * @return      void
 	 */
 	public static void highScores() {
@@ -212,19 +213,38 @@ public class Main {
 				"                    $$$$$$/                                                                              \r\n"  );
 		
 
-		//TODO Add code here to open high score files and then print it out to the console.
+		try {
+			textToConsole("HighScores.txt");
+			System.out.println("Please run the game again to play.\n");
+		} catch (IOException e) {
+			System.out.println("High scores file not found, please play a game first.\nPlease run the game again to play.");
+		}
 	}
 	
 	/**
-	 * Play the game:
-	 * Loop through each round
-	 * 	  Loop through each player within each round
-	 * 	  Player moves to the next round by typing "no changes"
-	 * 	  If the player types Quit (and then ProcessGameRound returns false), then the game should end.
+	 * The startGame method
+	 * Purpose:  Gameplay
+	 * 	  Play the game:
+	 *    Loop through each round
+	 * 	     Loop through each player within each round
+	 * 	     Player moves to the next round by typing "no changes"
+	 * 	     If the player types Quit (and then ProcessGameRound returns false), then the game should end.
 	 * @return      void
 	 */
 	public static void startGame() {
 		boolean roundSuccess=true;
+		
+		System.out.println("------------------------------------------------------------------------------");
+		System.out.println("--                                 How to play                              --");
+		System.out.println("-- You start with $2.00 and 25 square ft of farm land. At the start of      --");
+		System.out.println("-- each round, check current seed prices, and use the 'buy' command to buy. --");
+		System.out.println("-- Type 'end turn' when you are finished purchasing plants                  --");
+		System.out.println("------------------------------------------------------------------------------");
+		System.out.println("-- Tip: See 'rounds to mature' to see how many rounds before harvest.       --");
+		System.out.println("-- Tip: Billy Bob's luck has been off, and you may wish to diversify.       --");
+		System.out.println("-- Tip: Carrots and Potatoes can only be harvested once before re-planting  --");
+		System.out.println("------------------------------------------------------------------------------");
+		promptEnterKey();
 		
 		//Display welcome message to each player
 		for (currentRound=1; currentRound<=maxRounds && roundSuccess; currentRound++) {
@@ -253,11 +273,13 @@ public class Main {
 			System.out.format("---Player %s  You earned $%5.2f  ---------\n",farmList.get(currentFarm).getPlayerName(),farmList.get(Main.currentFarm).getPlayerCash());
 			System.out.format("--------Thank you for playing!!!----------\n");
 			System.out.format("------------------------------------------\n");
+			farmList.get(currentFarm).logGame();
 		}		
 	}
 	
 	/**
-	 * Loops through each player and gathers input for commands that can be processed by each player
+	 * The processGameRound method
+	 * Purpose: Loops through each player and gathers input for commands that can be processed by each player
 	 * in each round.
 	 * @param int round The number of the round being processed
 	 * @return      boolean (If false then the round failed)
@@ -292,23 +314,26 @@ public class Main {
 
 					//Validate the number of vegetable purchased as being between 1 and 999
 					//Validate the name of the vegetable purchased (i.e. make sure it is present)
-					int plant=getPlantIndex(matcher.group(3));
-					int qty=Integer.parseInt(matcher.group(2));
+					try {
+						int plant=getPlantIndex(matcher.group(3));
+						int qty=Integer.parseInt(matcher.group(2));
+						if (plant>=0 && plant<=plants.length && qty>=1 && qty<=999) 
+						{
+							//valid add plant command received
 
-					//System.out.format("Attempting to buy quantity: %d of plant %d\n",qty,plant);
-					
-					if (plant>=0 && plant<=plants.length && qty>=1 && qty<=999) 
-					{
-						//valid add plant command received
-
-						//The AddPlant call is in a try block since this may fail if there is
-						//insufficient cash or insufficient land space available.
-						try {
-							farmList.get(currentFarm).addPlant(plant,qty);
+							//The AddPlant call is in a try block since this may fail if there is
+							//insufficient cash or insufficient land space available.
+							try {
+								//System.out.format("DEBUG:Attempting to buy quantity: %d of plant %d\n",qty,plant);
+								farmList.get(currentFarm).addPlant(plant,qty);
+							}
+							catch (Exception ex) {
+								System.out.format("Failed to complete purchase.  Command cancelled.\n");
+							}
 						}
-						catch (Exception ex) {
-							System.out.format("Failed to complete purchase.  Command cancelled.\n");
-						}
+					}
+					catch (NoSuchElementException ex) {
+						System.out.format("Failed to locate a plant by that name.\nValid values include: [Carrot, Tomato, Potato, Corn, Watermelon]\nPlease try your buy command again.\n");
 					}
 					break;
 				case "END":
@@ -328,8 +353,11 @@ public class Main {
 	}
 
 	/**
-	 * For the selected round, show the current seed costs.
-	 * For the upcoming round, show forecasted market prices.
+	 * The showPrices method
+	 * Purpose: For the selected round and in the context of a farm and player-
+ 	 *    Show the current seed costs.
+	 * 	  For the upcoming round, show forecasted market prices.
+	 *    Display current plant inventory
 	 * @param int round Display seed costs & forecasted prices for this game round.
 	 * @return      void
 	 */
@@ -387,7 +415,8 @@ public class Main {
 	
 
 	/**
-	 * Loops through all plants and rounds and calculates seed costs and market prices.
+	 * The setPrices method
+	 * Purpose: Loops through all plants and rounds and calculates seed costs and market prices.
 	 * @return      void
 	 */
 	private static void setPrices() {
@@ -405,11 +434,11 @@ public class Main {
 		}		
 	}
 
-	
 	/**
-	 * Round a number to the provided precision
-	 * @param - double for the number to be rounded
-	 * @param - integer for the number of digits of precision
+	 * The roundDigits method
+	 * Purpose: Round a number to the provided precision
+	 * @param - number (double) to be rounded
+	 * @param - digits (int) for the number of digits of precision
 	 * @return double
 	 */
 	public static double roundDigits (double number,int digits) {
@@ -419,7 +448,9 @@ public class Main {
 	}
 
 	/**
-	 * A simple function to prompt and catch an enter key to manage the flow of user input.
+	 * The promptEnterKey method
+	 * Purpose: A simple function to prompt and catch an enter key to manage the flow of user input.
+	 * @return void
 	 */
 	public static void promptEnterKey(){
 	    System.out.format("Press ENTER to continue.");
@@ -434,8 +465,10 @@ public class Main {
 	}
 	
 	/**
-	 * A simple function to prompt and catch an enter key to manage the flow of user input.
-	 * @param String fn - the path and file name of the text file to output to console, i.e. "img/tractor.txt"
+	 * The textToConsole method
+	 * A simple function to output a file of text to the console.
+	 * @param fn (String) - the path and file name of the text file to output to console, i.e. "img/tractor.txt"
+     * @return void
 	 */
 	public static void textToConsole(String fn) throws IOException {
 		BufferedReader in = new BufferedReader(new FileReader(fn));
@@ -447,4 +480,5 @@ public class Main {
 		}
 		in.close();		
 	}
+
 }

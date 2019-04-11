@@ -1,5 +1,9 @@
 package main;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -80,8 +84,13 @@ public class Farm {
 	 * @param double - change current player cash amount
 	 */
 	protected void changeCash(double amount) {
-		// TODO Throw exception if cash will be less than zero
-		this.playerCash+=amount;
+		if (amount+this.playerCash<0) {
+			throw new NotEnoughMoneyException();
+		}
+		else
+		{
+			this.playerCash+=amount;
+		}
 	}
 	
 	/**
@@ -90,9 +99,13 @@ public class Farm {
 	 * @param double - change current farm available space
 	 */
 	protected void changeSpace(double space) {
-		// TODO Throw exception if space will be more than maximum or less than zero
-		
-		this.spaceUsed+=space;
+		if (space>this.getSpaceAvailable()) {
+			throw new NotEnoughLandException();
+		}
+		else
+		{
+			this.spaceUsed+=space;
+		}
 	}
 	
 	/**
@@ -158,5 +171,46 @@ public class Farm {
 			System.out.format("Error: Plant ID %d not implemented.",plant);
 			break;
 		}
+	}
+	
+	/** 
+	 * The logGame method - 
+	 * Purpose:  log the game results to the high scores file
+	 * Note that at this point the game is simply going to log all completed games
+	 * Rather than trying to determine which is the most worthy of remaining in the log.
+	 */
+	public void logGame() {
+    	//boolean to track if the highscores file needs a header
+		boolean needsHeader=false;
+    	//pointer to the high scores file object
+        File file = new  File("highscores.txt");
+        //header to write to the high scores file as needed
+        String header = "Player Name      Money Earned\n-----------      ------------\n";
+        //The actual scores to write out to the file
+        String content = String.format("%-16s $%-5.2f\n",playerName,playerCash);
+
+        try {
+
+	        // if file doesn't exists, then create it
+	        if (!file.exists()) {
+	            file.createNewFile();
+	            needsHeader=true;
+	        }
+
+	        FileWriter fw = new FileWriter(file.getAbsoluteFile(),true);
+	        BufferedWriter bw = new BufferedWriter(fw);
+	        if (needsHeader) { 
+		        bw.write(header);
+	        }
+	        
+	        bw.write(content);
+	        bw.close();
+
+	        System.out.println("High scores file updated.");
+
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	        System.out.format("Failed to update high scores file: %s",e.toString());
+	    }
 	}
 }

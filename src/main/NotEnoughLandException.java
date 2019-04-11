@@ -6,5 +6,8 @@ package main;
  */
 @SuppressWarnings("serial")
 public class NotEnoughLandException extends RuntimeException {
-   // TODO Leanne - please implement this custom exception similar to NotEnoughMoneyException.
+	public NotEnoughLandException() {
+		super("Not enough land to purchase this plant.");
+	}
 }
+
